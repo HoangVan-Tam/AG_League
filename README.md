@@ -1,6 +1,6 @@
 # AG League ⚽
 
-Website hiển thị **dự chi và kế hoạch tổ chức giải đá banh giữa các hội thánh** — sân 7, 4–6 đội, không lợi nhuận.
+Website hiển thị **dự chi và kế hoạch tổ chức giải đá banh giữa các Hội Thánh** — sân 7, 4–6 đội, không lợi nhuận.
 
 ## Tính năng
 
@@ -48,4 +48,4 @@ AG_League/
 ```
 
 ---
-AG League · Giải giao lưu giữa các hội thánh · 2026
+AG League · Giải giao lưu giữa các Hội Thánh · 2026
