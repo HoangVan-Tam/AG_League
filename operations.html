@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vận hành giải — AG League</title>
+  <meta name="description" content="Trang vận hành giải đấu: lịch thi đấu, tỷ số, bảng xếp hạng, vua phá lưới." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="ops-page">
+  <header class="hero">
+    <div class="hero__inner">
+      <span class="hero__badge">⚽ AG LEAGUE</span>
+      <h1>Vận hành giải đấu</h1>
+      <p>Lịch thi đấu · Tỷ số · Bảng xếp hạng · Vua phá lưới</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Toolbar -->
+    <section class="card">
+      <h2>⚙️ Thiết lập giải</h2>
+      <div class="controls">
+        <label>
+          Số đội
+          <select id="opsTeams">
+            <option value="4" selected>4 đội</option>
+            <option value="5">5 đội</option>
+            <option value="6">6 đội</option>
+          </select>
+        </label>
+        <label>
+          Ngày thi đấu
+          <input type="date" id="opsDate" />
+        </label>
+        <label>
+          Sân
+          <input type="text" id="opsVenue" placeholder="tên sân" />
+        </label>
+      </div>
+
+      <h3 class="ops__subhead">Tên các đội</h3>
+      <div class="controls" id="teamNames"></div>
+
+      <div class="ops__actions">
+        <button class="auto-btn" id="btnGenerate">🔄 Sinh lịch</button>
+        <button class="auto-btn" id="btnExport">💾 Xuất JSON</button>
+        <button class="auto-btn" id="btnImport">📂 Nhập JSON</button>
+        <input type="file" id="fileInput" accept=".json" hidden />
+      </div>
+      <p class="card__hint">Nhập tỷ số &amp; scorer từng trận → bảng xếp hạng &amp; vua phá lưới tự tính. Xuất JSON để lưu, nhập lại để khôi phục.</p>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="opsSchedule">📅 Lịch &amp; tỷ số</button>
+      <button class="tab" data-tab="opsStandings">📊 Bảng xếp hạng</button>
+      <button class="tab" data-tab="opsResults">🏁 Kết quả</button>
+      <button class="tab" data-tab="opsScorers">⚽ Vua phá lưới</button>
+    </div>
+
+    <section class="card tab-panel tab-panel--active" id="opsSchedule">
+      <h2>📅 Lịch thi đấu &amp; nhập tỷ số</h2>
+      <div id="scheduleWrap"></div>
+    </section>
+
+    <section class="card tab-panel" id="opsStandings">
+      <h2>📊 Bảng xếp hạng</h2>
+      <table class="budget-table" id="standingsTable">
+        <thead><tr><th>#</th><th>Đội</th><th>Trận</th><th>Thắng</th><th>Hòa</th><th>Thua</th><th>Bàn thắng</th><th>Bàn bại</th><th>Hiệu số</th><th>Điểm</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="card__hint">Tính từ các trận vòng tròn đã có tỷ số. Thắng 3đ, hòa 1đ, thua 0đ.</p>
+    </section>
+
+    <section class="card tab-panel" id="opsResults">
+      <h2>🏁 Kết quả các trận</h2>
+      <div id="resultsWrap"></div>
+    </section>
+
+    <section class="card tab-panel" id="opsScorers">
+      <h2>⚽ Vua phá lưới</h2>
+      <table class="budget-table" id="scorersTable">
+        <thead><tr><th>#</th><th>Cầu thủ</th><th>Đội</th><th>Bàn</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="card__hint">Nhập scorer từng trận theo định dạng: <strong>Tên 2; Tên2 1</strong> (tên + số bàn, cách nhau bằng ;).</p>
+    </section>
+  </main>
+
+  <footer>
+    <p><a href="index.html" class="back-link">← Trang chính</a> &nbsp; <a href="thong-bao.html" class="back-link">📄 Thông báo</a></p>
+    <p>AG League · Vận hành giải đấu · 2026</p>
+  </footer>
+
+  <script src="ops.js"></script>
+</body>
+</html>
