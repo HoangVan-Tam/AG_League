@@ -106,32 +106,33 @@ function renderSchedule() {
     if (!stages[st]) return;
     const group = document.createElement('div');
     group.className = 'ops__stage';
-    group.innerHTML = `<h3 class="ops__subhead">${st}</h3>`;
-    const tbl = document.createElement('table');
-    tbl.className = 'budget-table ops__match-table';
-    tbl.innerHTML = `<thead><tr><th>Trận</th><th>Đội nhà</th><th></th><th>Đội khách</th><th>Scorer (Tên Số_bàn; ...)</th></tr></thead><tbody></tbody>`;
-    const tbody = tbl.querySelector('tbody');
-    stages[st].forEach((m, i) => {
-      const tr = document.createElement('tr');
+    const head = document.createElement('h3');
+    head.className = 'ops__subhead';
+    head.textContent = st;
+    group.appendChild(head);
+    stages[st].forEach((m) => {
       const homeName = m.home == null ? '?' : (state.names[m.home] || fmtTeam(m.home));
       const awayName = m.away == null ? '?' : (state.names[m.away] || fmtTeam(m.away));
-      tr.innerHTML = `
-        <td>${m.round || st}</td>
-        <td>${homeName}</td>
-        <td class="ops__score">
-          <input type="number" min="0" data-id="${m.id}" data-side="home" value="${m.homeScore}" />
-          <span>:</span>
-          <input type="number" min="0" data-id="${m.id}" data-side="away" value="${m.awayScore}" />
-        </td>
-        <td>${awayName}</td>
-        <td><input type="text" data-id="${m.id}" data-side="scorers" value="${m.scorers || ''}" placeholder="vd: An 2; Bình 1" /></td>
+      const card = document.createElement('div');
+      card.className = 'ops-match';
+      card.innerHTML = `
+        <div class="ops-match__no">${m.round != null ? '#' + m.round : ''}</div>
+        <div class="ops-match__teams">
+          <span class="ops-match__team ops-match__team--home">${homeName}</span>
+          <span class="ops__score">
+            <input type="number" min="0" data-id="${m.id}" data-side="home" value="${m.homeScore}" placeholder="0" />
+            <span>:</span>
+            <input type="number" min="0" data-id="${m.id}" data-side="away" value="${m.awayScore}" placeholder="0" />
+          </span>
+          <span class="ops-match__team ops-match__team--away">${awayName}</span>
+        </div>
+        <input class="ops-match__scorers" type="text" data-id="${m.id}" data-side="scorers" value="${m.scorers || ''}" placeholder="Scorer: vd An 2; Bình 1" />
       `;
-      tbody.appendChild(tr);
+      group.appendChild(card);
     });
-    group.appendChild(tbl);
     wrap.appendChild(group);
   });
-  // bind score inputs
+  // bind inputs
   wrap.querySelectorAll('input[data-id]').forEach((inp) => {
     inp.addEventListener('input', onMatchInput);
   });
@@ -180,7 +181,7 @@ function renderStandings() {
   tbody.innerHTML = '';
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i + 1}</td><td class="ops__team">${r.name}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td><strong>${r.pts}</strong></td>`;
+    tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td><strong>${r.pts}</strong></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -313,16 +314,6 @@ document.getElementById('btnImport').addEventListener('click', () => document.ge
 document.getElementById('fileInput').addEventListener('change', (e) => {
   if (e.target.files[0]) importJSON(e.target.files[0]);
   e.target.value = '';
-});
-
-// Tabs
-document.querySelectorAll('.tab').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((b) => b.classList.remove('tab--active'));
-    document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('tab-panel--active'));
-    btn.classList.add('tab--active');
-    document.getElementById(btn.dataset.tab).classList.add('tab-panel--active');
-  });
 });
 
 // Initial render
