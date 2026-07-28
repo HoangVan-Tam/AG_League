@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AG League — Dự chi giải đá banh sân 5 & sân 7</title>
+  <meta name="description" content="Dự chi và kế hoạch tổ chức giải đá banh giữa các hội thánh — sân 5 & sân 7, 4–6 đội." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__inner">
+      <span class="hero__badge">⚽ AG LEAGUE</span>
+      <h1>Giải đá banh giữa các hội thánh</h1>
+      <p>4–6 đội · Không lợi nhuận · Cân bằng &amp; hấp dẫn</p>
+      <div class="hero__stats">
+        <div class="stat">
+          <span class="stat__num">4–6</span>
+          <span class="stat__label">Đội tham gia</span>
+        </div>
+        <div class="stat">
+          <span class="stat__num">10.000.000</span>
+          <span class="stat__label">Tài trợ (₫)</span>
+        </div>
+        <div class="stat">
+          <span class="stat__num">1.0–1.5tr</span>
+          <span class="stat__label">Phí / đội</span>
+        </div>
+        <div class="stat">
+          <span class="stat__num">2×25</span>
+          <span class="stat__label">Phút / trận</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Rules (common) -->
+    <section class="card">
+      <h2>📜 Luật &amp; thể thức</h2>
+      <ul class="rules">
+        <li><strong>Thể thức:</strong> Vòng tròn → 2 đội nhất &amp; nhì vào chung kết, 2 đội ba &amp; tư tranh hạng ba. Số trận: 4 đội = 8, 5 đội = 12, 6 đội = 8.</li>
+        <li><strong>Đăng ký:</strong> mỗi đội đăng ký tối đa 15 người (sân 7 đá 7 + dự bị; sân 5 đá 5 + dự bị).</li>
+        <li><strong>Trận đấu:</strong> Cả sân 7 và sân 5 — 2 hiệp × 25 phút, nghỉ 5 phút. Không越 vị. Thay người tự do.</li>
+        <li><strong>Cầu thủ trên 35 tuổi:</strong> mỗi đội được đăng ký tối đa 2 cầu thủ trên 35 tuổi (cân bằng trình độ, cho người lớn tuổi tham gia).</li>
+        <li><strong>Ghép đội:</strong> các hội thánh nhỏ có thể liên kết lại thành 1 đội (đăng ký trước hạn chót).</li>
+        <li><strong>Xếp hạng:</strong> Điểm → Hiệu số → Tổng bàn → Đối đầu → Bốc thăm.</li>
+      </ul>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab tab--active" data-tab="p7" role="tab">Phần 1 — Sân 7</button>
+      <button class="tab" data-tab="p5" role="tab">Phần 2 — Sân 5</button>
+    </div>
+
+    <!-- ===================== PHẦN 1: SÂN 7 ===================== -->
+    <div class="tab-panel tab-panel--active" id="p7">
+      <section class="card">
+        <h2>Phần 1 — Dự chi sân 7</h2>
+        <p class="card__hint">Sân 7: 7 người + dự bị (~12 người/đội), 2 hiệp × 25 phút. Giá sân tham khảo <strong>680.000đ/trận</strong> (thuê block).</p>
+
+        <div class="controls">
+          <label>
+            Số đội
+            <select id="teams7">
+              <option value="4" selected>4 đội</option>
+              <option value="5">5 đội</option>
+              <option value="6">6 đội</option>
+            </select>
+          </label>
+          <label>
+            Phí mỗi đội (₫)
+            <input type="text" inputmode="numeric" id="fee7" value="1500000" />
+          </label>
+          <label>
+            Tài trợ (₫)
+            <input type="text" inputmode="numeric" id="sponsor7" value="10000000" />
+          </label>
+          <label>
+            Giá sân / trận (₫)
+            <input type="text" inputmode="numeric" id="pitch7" value="680000" />
+          </label>
+          <label>
+            Trọng tài / trận (₫)
+            <input type="text" inputmode="numeric" id="ref7" value="150000" />
+          </label>
+          <label>
+            Lưu niệm (₫)
+            <input type="text" inputmode="numeric" id="trophy7" value="2000000" />
+          </label>
+        </div>
+
+        <div class="result-grid">
+          <div class="result result--fund">
+            <span class="result__label">Tổng quỹ</span>
+            <span class="result__value" id="rFund7">0đ</span>
+          </div>
+          <div class="result result--cost">
+            <span class="result__label">Tổng chi phí</span>
+            <span class="result__value" id="rCost7">0đ</span>
+          </div>
+          <div class="result result--prize">
+            <span class="result__label">Quỹ giải thưởng</span>
+            <span class="result__value" id="rPrize7">0đ</span>
+          </div>
+        </div>
+        <p class="warning" id="warn7" hidden></p>
+      </section>
+
+      <section class="card">
+        <h2>💰 Chi phí cụ thể (sân 7)</h2>
+        <table class="budget-table">
+          <thead><tr><th>Khoản chi</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
+          <tbody id="body7"></tbody>
+          <tfoot>
+            <tr><td colspan="3">Tổng chi phí</td><td id="tCost7">0đ</td></tr>
+            <tr class="prize-row"><td colspan="3">Quỹ giải thưởng</td><td id="tPrize7">0đ</td></tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>🏆 Giải thưởng (sân 7)</h2>
+        <p class="card__hint">Tự phân bổ khi đổi input. Có thể chỉnh tay từng giải.</p>
+        <button class="auto-btn" data-auto="7">⚡ Phân bổ lại</button>
+        <div class="prize-inputs" id="prizeInputs7"></div>
+        <div class="prize-summary">
+          <span>Tổng giải thưởng: <strong id="prizeSum7">0đ</strong></span>
+          <span>Quỹ thưởng: <strong id="prizeFund7">0đ</strong></span>
+          <span id="prizeDiff7" class="prize-diff"></span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== PHẦN 2: SÂN 5 ===================== -->
+    <div class="tab-panel" id="p5">
+      <section class="card">
+        <h2>Phần 2 — Dự chi sân 5</h2>
+        <p class="card__hint">Sân 5: 5 người + dự bị (~8 người/đội), 2 hiệp × 25 phút. Giá sân tham khảo <strong>400.000đ/trận</strong>. Phù hợp hội thánh nhỏ, ít người.</p>
+
+        <div class="controls">
+          <label>
+            Số đội
+            <select id="teams5">
+              <option value="4" selected>4 đội</option>
+              <option value="5">5 đội</option>
+              <option value="6">6 đội</option>
+            </select>
+          </label>
+          <label>
+            Phí mỗi đội (₫)
+            <input type="text" inputmode="numeric" id="fee5" value="1000000" />
+          </label>
+          <label>
+            Tài trợ (₫)
+            <input type="text" inputmode="numeric" id="sponsor5" value="10000000" />
+          </label>
+          <label>
+            Giá sân / trận (₫)
+            <input type="text" inputmode="numeric" id="pitch5" value="400000" />
+          </label>
+          <label>
+            Trọng tài / trận (₫)
+            <input type="text" inputmode="numeric" id="ref5" value="150000" />
+          </label>
+          <label>
+            Lưu niệm (₫)
+            <input type="text" inputmode="numeric" id="trophy5" value="2000000" />
+          </label>
+        </div>
+
+        <div class="result-grid">
+          <div class="result result--fund">
+            <span class="result__label">Tổng quỹ</span>
+            <span class="result__value" id="rFund5">0đ</span>
+          </div>
+          <div class="result result--cost">
+            <span class="result__label">Tổng chi phí</span>
+            <span class="result__value" id="rCost5">0đ</span>
+          </div>
+          <div class="result result--prize">
+            <span class="result__label">Quỹ giải thưởng</span>
+            <span class="result__value" id="rPrize5">0đ</span>
+          </div>
+        </div>
+        <p class="warning" id="warn5" hidden></p>
+      </section>
+
+      <section class="card">
+        <h2>💰 Chi phí cụ thể (sân 5)</h2>
+        <table class="budget-table">
+          <thead><tr><th>Khoản chi</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
+          <tbody id="body5"></tbody>
+          <tfoot>
+            <tr><td colspan="3">Tổng chi phí</td><td id="tCost5">0đ</td></tr>
+            <tr class="prize-row"><td colspan="3">Quỹ giải thưởng</td><td id="tPrize5">0đ</td></tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>🏆 Giải thưởng (sân 5 — dư quỹ hơn)</h2>
+        <p class="card__hint">Tự phân bổ khi đổi input. Có thể chỉnh tay từng giải.</p>
+        <button class="auto-btn" data-auto="5">⚡ Phân bổ lại</button>
+        <div class="prize-inputs" id="prizeInputs5"></div>
+        <div class="prize-summary">
+          <span>Tổng giải thưởng: <strong id="prizeSum5">0đ</strong></span>
+          <span>Quỹ thưởng: <strong id="prizeFund5">0đ</strong></span>
+          <span id="prizeDiff5" class="prize-diff"></span>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>AG League · Giải giao lưu giữa các hội thánh · 2026</p>
+    <p><a href="thong-bao.html" class="back-link">📄 Thư thông báo gửi Mục sư quản nhiệm</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
