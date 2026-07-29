@@ -949,8 +949,14 @@ footer {
 .ops-match__scorers:focus { outline: none; border-color: var(--accent); }
 
 /* Standings compact */
-.ops-stand th, .ops-stand td { text-align: center; }
-.ops-stand th:nth-child(2), .ops-stand td:nth-child(2) { text-align: left; font-weight: 700; color: var(--navy-dark); }
+.ops-stand { table-layout: fixed; }
+.ops-stand th, .ops-stand td { text-align: center; padding: .55rem .3rem; }
+.ops-stand th:nth-child(1), .ops-stand td:nth-child(1) { width: 8%; }
+.ops-stand th:nth-child(2), .ops-stand td:nth-child(2) {
+  text-align: left; font-weight: 700; color: var(--navy-dark);
+  width: 40%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .ops-stand td:last-child { font-weight: 800; color: var(--navy); }
 
 /* Results */
