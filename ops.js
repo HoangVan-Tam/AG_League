@@ -163,6 +163,7 @@ function computeStandings() {
     if (!m.id.startsWith('RR')) return;
     if (m.homeScore === '' || m.awayScore === '' || m.home == null || m.away == null) return;
     const h = rows[m.home], a = rows[m.away];
+    if (!h || !a) return;
     h.p++; a.p++;
     h.gf += m.homeScore; h.ga += m.awayScore;
     a.gf += m.awayScore; a.ga += m.homeScore;
@@ -226,9 +227,8 @@ function parseScorers(text, teamIdx) {
 function renderScorers() {
   const map = {};
   state.matches.forEach((m) => {
-    if (m.homeScore === '' || m.awayScore === '') {
-      // still allow scorers even if score not set? require score
-    }
+    if (m.home == null || m.away == null) return;
+    if (m.homeScore === '' || m.awayScore === '') return;
     // home scorers
     parseScorers(m.scorers, m.home).forEach((s) => {
       const key = s.name + '|' + s.team;
