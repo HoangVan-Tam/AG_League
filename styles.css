@@ -432,6 +432,8 @@ table { width: 100%; border-collapse: collapse; }
   font-variant-numeric: tabular-nums;
 }
 .prize-input input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+/* Ẩn giải chỉ-8-đội khi không phải 8 đội */
+.hide-only8 .prize-input--only8 { display: none; }
 
 /* ===== Prize summary ===== */
 .prize-summary {

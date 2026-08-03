@@ -44,18 +44,20 @@ const PRIZES = [
   { key: 'third',  label: 'Hạng ba',          note: '+ huy chương',       ratio: 0.21 },
   { key: 'scorer', label: 'Vua phá lưới',     note: '',                   ratio: 0,    fixed: 200000 },
   { key: 'fair',   label: 'Đội Fair-play',    note: '',                   ratio: 0,    fixed: 200000 },
+  { key: 'bchamp', label: 'Nhất Serie B',     note: '(chỉ 8 đội)',         ratio: 0,    fixed: 500000, only8: true },
+  { key: 'brunner', label: 'Nhì Serie B',     note: '(chỉ 8 đội)',         ratio: 0,    fixed: 300000, only8: true },
 ];
 
 // Giá trị mặc định khi khởi tạo (sân 7)
-const PRIZE_DEFAULT_7 = { champ: 1500000, runner: 700000, third: 300000, scorer: 200000, fair: 200000 };
-const PRIZE_DEFAULT_5 = { champ: 2500000, runner: 1200000, third: 500000, scorer: 300000, fair: 300000 };
+const PRIZE_DEFAULT_7 = { champ: 1500000, runner: 700000, third: 300000, scorer: 200000, fair: 200000, bchamp: 500000, brunner: 300000 };
+const PRIZE_DEFAULT_5 = { champ: 2500000, runner: 1200000, third: 500000, scorer: 300000, fair: 300000, bchamp: 500000, brunner: 300000 };
 
 function renderPrizeInputs(prefix, defaults) {
   const container = document.getElementById('prizeInputs' + prefix);
   container.innerHTML = '';
   PRIZES.forEach((p) => {
     const div = document.createElement('div');
-    div.className = 'prize-input';
+    div.className = 'prize-input' + (p.only8 ? ' prize-input--only8' : '');
     div.innerHTML = `
       <label>
         <span class="prize-input__name">${p.label}</span>
@@ -71,16 +73,25 @@ function renderPrizeInputs(prefix, defaults) {
   });
 }
 
-function getPrizeValues(prefix) {
+// Ẩn/hiện giải chỉ-8-đội theo số đội
+function toggleOnly8(prefix, teams) {
+  const container = document.getElementById('prizeInputs' + prefix);
+  if (teams === 8) container.classList.remove('hide-only8');
+  else container.classList.add('hide-only8');
+}
+
+function getPrizeValues(prefix, teams) {
   const vals = {};
   PRIZES.forEach((p) => {
+    if (p.only8 && teams !== 8) { vals[p.key] = 0; return; }
     vals[p.key] = parseInput(document.getElementById(`prize_${prefix}_${p.key}`).value) || 0;
   });
   return vals;
 }
 
 function updatePrizeSum(prefix) {
-  const vals = getPrizeValues(prefix);
+  const teams = parseInt(document.getElementById('prizeFund' + prefix).dataset.teams || '4', 10);
+  const vals = getPrizeValues(prefix, teams);
   const sum = Object.values(vals).reduce((a, b) => a + b, 0);
   document.getElementById('prizeSum' + prefix).textContent = fmt(sum);
   // Quỹ thưởng lấy từ kết quả tính toán (lưu vào data attribute)
@@ -108,14 +119,19 @@ const PRIZE_BUFFER = 0;
 const PRIZE_STEP = 500000;
 
 function autoAllocate(prefix, prize) {
+  const teams = parseInt(document.getElementById('prizeFund' + prefix).dataset.teams || '4', 10);
+  toggleOnly8(prefix, teams);
   // Phần thực tế để chia = quỹ - buffer
   const distributable = Math.max(prize - PRIZE_BUFFER, 0);
   const vals = {};
 
-  // Giải phụ cố định: vua phá lưới + fair-play = 200k
+  // Giải phụ cố định: vua phá lưới + fair-play (luôn), Serie B (chỉ 8 đội)
   let fixedTotal = 0;
   PRIZES.forEach((p) => {
-    if (p.fixed) { vals[p.key] = p.fixed; fixedTotal += p.fixed; }
+    if (p.fixed) {
+      if (p.only8 && teams !== 8) { vals[p.key] = 0; return; }
+      vals[p.key] = p.fixed; fixedTotal += p.fixed;
+    }
   });
 
   // Phần cho 3 giải chính (vô địch/á/hạng ba)
@@ -218,9 +234,11 @@ function computePanel(prefix, pitchType) {
   // Lưu quỹ thưởng cho phần giải thưởng và cập nhật
   const pf = document.getElementById('prizeFund' + prefix);
   const prevPrize = +(pf.dataset.value || 0);
+  const prevTeams = pf.dataset.teams;
   pf.dataset.value = prize;
-  // Nếu quỹ thưởng thay đổi do đổi chi phí/số đội → tự phân bổ lại (không cần bấm nút)
-  if (prevPrize !== prize) {
+  pf.dataset.teams = teams;
+  // Nếu quỹ thưởng hoặc số đội thay đổi → tự phân bổ lại (không cần bấm nút)
+  if (prevPrize !== prize || prevTeams !== String(teams)) {
     autoAllocate(prefix, Math.max(prize, 0));
   } else {
     updatePrizeSum(prefix);
