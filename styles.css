@@ -958,6 +958,19 @@ footer {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .ops-stand td:last-child { font-weight: 800; color: var(--navy); }
+/* 2 bảng xếp hạng (8 đội) */
+.ops-standings-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.ops-standings-group .ops__subhead { margin-top: 0; }
+.ops-match__label {
+  font-size: .78rem;
+  color: var(--accent);
+  font-weight: 600;
+  font-style: italic;
+}
 
 /* Results */
 .ops__result {
@@ -989,6 +1002,7 @@ footer {
 
 @media (max-width: 860px) {
   .ops-grid { grid-template-columns: 1fr; }
+  .ops-standings-wrap { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .ops__result__label { margin-left: 0; width: 100%; }

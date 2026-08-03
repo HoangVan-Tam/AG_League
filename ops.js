@@ -41,9 +41,35 @@ function roundRobin(indices) {
 // ===== Build matches =====
 function buildMatches() {
   const n = state.teams;
+  const matches = [];
+
+  if (n === 8) {
+    // 2 bảng Serie A (0-3) & Serie B (4-7), mỗi bảng vòng tròn 1 lượt
+    const groupA = [0, 1, 2, 3];
+    const groupB = [4, 5, 6, 7];
+    const buildGroup = (indices, gname) => {
+      const rr = roundRobin(indices);
+      rr.forEach((m, i) => {
+        matches.push({
+          id: gname + i, stage: gname + ' — Vòng tròn', group: gname, round: i + 1,
+          home: m.home, away: m.away,
+          homeScore: '', awayScore: '', scorers: '',
+        });
+      });
+    };
+    buildGroup(groupA, 'Serie A');
+    buildGroup(groupB, 'Serie B');
+    // Bán kết: 1A vs 2B, 1B vs 2A
+    matches.push({ id: 'SF1', stage: 'Bán kết', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Nhất Serie A vs Nhì Serie B' });
+    matches.push({ id: 'SF2', stage: 'Bán kết', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Nhất Serie B vs Nhì Serie A' });
+    matches.push({ id: 'F3', stage: 'Tranh hạng 3', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
+    matches.push({ id: 'CK', stage: 'Chung kết', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
+    return matches;
+  }
+
+  // Mặc định: 1 bảng vòng tròn + CK + hạng 3
   const idx = Array.from({ length: n }, (_, i) => i);
   const rr = roundRobin(idx);
-  const matches = [];
   rr.forEach((m, i) => {
     matches.push({
       id: 'RR' + i, stage: 'Vòng tròn', round: i + 1,
@@ -51,7 +77,6 @@ function buildMatches() {
       homeScore: '', awayScore: '', scorers: '',
     });
   });
-  // Knockout placeholders (resolved after round-robin)
   matches.push({ id: 'F3', stage: 'Tranh hạng 3', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
   matches.push({ id: 'CK', stage: 'Chung kết', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
   return matches;
@@ -77,10 +102,49 @@ function renderTeamNames() {
 
 // ===== Render schedule =====
 function resolveKnockout() {
-  // Determine standings to set CK + H3 pairs
-  const standings = computeStandings();
+  const is8 = state.teams === 8;
   const f3 = state.matches.find((m) => m.id === 'F3');
   const ck = state.matches.find((m) => m.id === 'CK');
+
+  if (is8) {
+    const { a, b } = computeStandings(); // {a:[], b:[]}
+    const sf1 = state.matches.find((m) => m.id === 'SF1');
+    const sf2 = state.matches.find((m) => m.id === 'SF2');
+    // Ghép bán kết khi vòng tròn đủ (có >=4 đội đã đá)
+    if (a && a.length >= 4 && b && b.length >= 4) {
+      if (sf1 && sf1.homeScore === '' && sf1.awayScore === '') {
+        sf1.home = a[0].idx; sf1.away = b[1].idx;
+      }
+      if (sf2 && sf2.homeScore === '' && sf2.awayScore === '') {
+        sf2.home = b[0].idx; sf2.away = a[1].idx;
+      }
+    }
+    // CK & hạng 3 từ kết quả bán kết
+    const resolveKO = (matchId) => {
+      const m = state.matches.find((x) => x.id === matchId);
+      if (!m || m.homeScore === '' || m.awayScore === '' || m.home == null) return null;
+      return m.homeScore > m.awayScore ? m.home : m.away;
+    };
+    const loseKO = (matchId) => {
+      const m = state.matches.find((x) => x.id === matchId);
+      if (!m || m.homeScore === '' || m.awayScore === '' || m.home == null) return null;
+      return m.homeScore > m.awayScore ? m.away : m.home;
+    };
+    const w1 = resolveKO('SF1'), w2 = resolveKO('SF2');
+    const l1 = loseKO('SF1'), l2 = loseKO('SF2');
+    if (ck && ck.homeScore === '' && ck.awayScore === '') {
+      if (w1 != null) ck.home = w1;
+      if (w2 != null) ck.away = w2;
+    }
+    if (f3 && f3.homeScore === '' && f3.awayScore === '') {
+      if (l1 != null) f3.home = l1;
+      if (l2 != null) f3.away = l2;
+    }
+    return;
+  }
+
+  // 1 bảng: CK = nhất vs nhì, hạng 3 = ba vs tư
+  const standings = computeStandings();
   if (standings.length >= 4) {
     if (f3 && f3.homeScore === '' && f3.awayScore === '') {
       f3.home = standings[2].idx; f3.away = standings[3].idx;
@@ -101,7 +165,7 @@ function renderSchedule() {
     if (!stages[m.stage]) stages[m.stage] = [];
     stages[m.stage].push(m);
   });
-  const stageOrder = ['Vòng tròn', 'Tranh hạng 3', 'Chung kết'];
+  const stageOrder = ['Serie A — Vòng tròn', 'Serie B — Vòng tròn', 'Vòng tròn', 'Bán kết', 'Tranh hạng 3', 'Chung kết'];
   stageOrder.forEach((st) => {
     if (!stages[st]) return;
     const group = document.createElement('div');
@@ -113,10 +177,12 @@ function renderSchedule() {
     stages[st].forEach((m) => {
       const homeName = m.home == null ? '?' : (state.names[m.home] || fmtTeam(m.home));
       const awayName = m.away == null ? '?' : (state.names[m.away] || fmtTeam(m.away));
+      const labelTxt = m.label ? `<div class="ops-match__label">${m.label}</div>` : '';
       const card = document.createElement('div');
       card.className = 'ops-match';
       card.innerHTML = `
-        <div class="ops-match__no">${m.round != null ? '#' + m.round : ''}</div>
+        <div class="ops-match__no">${m.round != null && m.round !== '' ? '#' + m.round : (m.label ? '' : '')}</div>
+        ${labelTxt}
         <div class="ops-match__teams">
           <span class="ops-match__team ops-match__team--home">${homeName}</span>
           <span class="ops__score">
@@ -149,20 +215,19 @@ function onMatchInput(e) {
   renderStandings();
   renderResults();
   renderScorers();
-  // If round-robin changed, re-resolve knockout teams (but keep KO scores if already filled)
-  if (id.startsWith('RR')) renderSchedule();
+  // If a round-robin match changed, re-resolve knockout teams (but keep KO scores if already filled)
+  const m2 = state.matches.find((x) => x.id === id);
+  if (m2 && (m2.group === 'Serie A' || m2.group === 'Serie B' || id.startsWith('RR'))) renderSchedule();
 }
 
 // ===== Standings =====
-function computeStandings() {
-  const rows = [];
-  for (let i = 0; i < state.teams; i++) {
-    rows.push({ idx: i, name: state.names[i] || fmtTeam(i), p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 });
-  }
+function computeGroup(indices, matchFilter) {
+  const rows = indices.map((i) => ({ idx: i, name: state.names[i] || fmtTeam(i), p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 }));
   state.matches.forEach((m) => {
-    if (!m.id.startsWith('RR')) return;
+    if (!matchFilter(m)) return;
     if (m.homeScore === '' || m.awayScore === '' || m.home == null || m.away == null) return;
-    const h = rows[m.home], a = rows[m.away];
+    const h = rows.find((r) => r.idx === m.home);
+    const a = rows.find((r) => r.idx === m.away);
     if (!h || !a) return;
     h.p++; a.p++;
     h.gf += m.homeScore; h.ga += m.awayScore;
@@ -176,15 +241,63 @@ function computeStandings() {
   return rows;
 }
 
+function computeStandings() {
+  if (state.teams === 8) {
+    const a = computeGroup([0, 1, 2, 3], (m) => m.group === 'Serie A');
+    const b = computeGroup([4, 5, 6, 7], (m) => m.group === 'Serie B');
+    return { a, b };
+  }
+  // 1 bảng: RR id cho 4/5/6 đội, hoặc có thể là 'RR' cũ
+  return computeGroup(Array.from({ length: state.teams }, (_, i) => i), (m) => m.id.startsWith('RR'));
+}
+
 function renderStandings() {
-  const rows = computeStandings();
-  const tbody = document.querySelector('#standingsTable tbody');
-  tbody.innerHTML = '';
-  rows.forEach((r, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td><strong>${r.pts}</strong></td>`;
-    tbody.appendChild(tr);
-  });
+  const stand = computeStandings();
+  const standBox = document.getElementById('standingsTable').parentElement;
+  const oldWrap = standBox.querySelector('.ops-standings-wrap');
+  if (oldWrap) oldWrap.remove();
+  const tableEl = document.getElementById('standingsTable');
+
+  const renderRows = (rows) => {
+    const tbody = document.createElement('tbody');
+    rows.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td><strong>${r.pts}</strong></td>`;
+      tbody.appendChild(tr);
+    });
+    return tbody;
+  };
+
+  if (state.teams === 8) {
+    // Render 2 bảng cạnh nhau
+    tableEl.style.display = 'none';
+    const wrap = document.createElement('div');
+    wrap.className = 'ops-standings-wrap';
+    const buildGroup = (title, rows) => {
+      const blk = document.createElement('div');
+      blk.className = 'ops-standings-group';
+      blk.innerHTML = `<h3 class="ops__subhead">${title}</h3>`;
+      const tbl = tableEl.cloneNode(true);
+      tbl.style.display = '';
+      tbl.id = '';
+      tbl.querySelector('tbody').remove();
+      tbl.appendChild(renderRows(rows));
+      blk.appendChild(tbl);
+      return blk;
+    };
+    wrap.appendChild(buildGroup('Serie A', stand.a));
+    wrap.appendChild(buildGroup('Serie B', stand.b));
+    standBox.appendChild(wrap);
+  } else {
+    tableEl.style.display = '';
+    const tbody = tableEl.querySelector('tbody');
+    tbody.innerHTML = '';
+    stand.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td><strong>${r.pts}</strong></td>`;
+      tbody.appendChild(tr);
+    });
+  }
 }
 
 // ===== Results =====

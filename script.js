@@ -3,7 +3,8 @@
 // 4 đội: vòng tròn 1 lượt (6) + CK + hạng 3 = 8
 // 5 đội: vòng tròn 1 lượt (10) + CK + hạng 3 = 12
 // 6 đội: 2 bảng vòng tròn (6) + CK + hạng 3 = 8
-const MATCHES = { 4: 8, 5: 12, 6: 8 };
+// 8 đội: 2 bảng × 4 vòng tròn (12) + bán kết (2) + CK + hạng 3 = 16
+const MATCHES = { 4: 8, 5: 12, 6: 8, 8: 16 };
 
 // Format đầy đủ: 14.000.000 ₫
 const fmt = (n) => {
@@ -151,8 +152,14 @@ function fixedCosts(teams, pitchType) {
     };
   }
   // 6 đội
+  if (teams === 6) {
+    return {
+      spare: p5 ? 500000  : 600000,
+    };
+  }
+  // 8 đội
   return {
-    spare: p5 ? 500000  : 600000,
+    spare: p5 ? 700000  : 900000,
   };
 }
 
