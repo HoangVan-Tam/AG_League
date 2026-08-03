@@ -57,13 +57,18 @@ function buildMatches() {
         });
       });
     };
-    buildGroup(groupA, 'Serie A');
-    buildGroup(groupB, 'Serie B');
-    // Bán kết: 1A vs 2B, 1B vs 2A
-    matches.push({ id: 'SF1', stage: 'Bán kết', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Nhất Serie A vs Nhì Serie B' });
-    matches.push({ id: 'SF2', stage: 'Bán kết', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Nhất Serie B vs Nhì Serie A' });
-    matches.push({ id: 'F3', stage: 'Tranh hạng 3', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
-    matches.push({ id: 'CK', stage: 'Chung kết', group: 'KO', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
+    buildGroup(groupA, 'Bảng A');
+    buildGroup(groupB, 'Bảng B');
+    // Serie A (top 2 mỗi bảng): bán kết + CK + hạng 3
+    matches.push({ id: 'ASF1', stage: 'Serie A — Bán kết', group: 'SerieA', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Nhất Bảng A vs Nhì Bảng B' });
+    matches.push({ id: 'ASF2', stage: 'Serie A — Bán kết', group: 'SerieA', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Nhất Bảng B vs Nhì Bảng A' });
+    matches.push({ id: 'AF3', stage: 'Serie A — Tranh hạng 3', group: 'SerieA', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
+    matches.push({ id: 'ACK', stage: 'Serie A — Chung kết', group: 'SerieA', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
+    // Serie B (hạng 3-4 mỗi bảng): bán kết + CK + hạng 3
+    matches.push({ id: 'BSF1', stage: 'Serie B — Bán kết', group: 'SerieB', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Hạng 3 Bảng A vs Hạng 4 Bảng B' });
+    matches.push({ id: 'BSF2', stage: 'Serie B — Bán kết', group: 'SerieB', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '', label: 'Hạng 3 Bảng B vs Hạng 4 Bảng A' });
+    matches.push({ id: 'BF3', stage: 'Serie B — Tranh hạng 3', group: 'SerieB', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
+    matches.push({ id: 'BCK', stage: 'Serie B — Chung kết', group: 'SerieB', round: '', home: null, away: null, homeScore: '', awayScore: '', scorers: '' });
     return matches;
   }
 
@@ -103,24 +108,10 @@ function renderTeamNames() {
 // ===== Render schedule =====
 function resolveKnockout() {
   const is8 = state.teams === 8;
-  const f3 = state.matches.find((m) => m.id === 'F3');
-  const ck = state.matches.find((m) => m.id === 'CK');
 
   if (is8) {
-    const { a, b } = computeStandings(); // {a:[], b:[]}
-    const sf1 = state.matches.find((m) => m.id === 'SF1');
-    const sf2 = state.matches.find((m) => m.id === 'SF2');
-    // Ghép bán kết khi vòng tròn đủ (có >=4 đội đã đá)
-    if (a && a.length >= 4 && b && b.length >= 4) {
-      if (sf1 && sf1.homeScore === '' && sf1.awayScore === '') {
-        sf1.home = a[0].idx; sf1.away = b[1].idx;
-      }
-      if (sf2 && sf2.homeScore === '' && sf2.awayScore === '') {
-        sf2.home = b[0].idx; sf2.away = a[1].idx;
-      }
-    }
-    // CK & hạng 3 từ kết quả bán kết
-    const resolveKO = (matchId) => {
+    const { a, b } = computeStandings(); // 2 bảng A/B
+    const winKO = (matchId) => {
       const m = state.matches.find((x) => x.id === matchId);
       if (!m || m.homeScore === '' || m.awayScore === '' || m.home == null) return null;
       return m.homeScore > m.awayScore ? m.home : m.away;
@@ -130,20 +121,40 @@ function resolveKnockout() {
       if (!m || m.homeScore === '' || m.awayScore === '' || m.home == null) return null;
       return m.homeScore > m.awayScore ? m.away : m.home;
     };
-    const w1 = resolveKO('SF1'), w2 = resolveKO('SF2');
-    const l1 = loseKO('SF1'), l2 = loseKO('SF2');
-    if (ck && ck.homeScore === '' && ck.awayScore === '') {
-      if (w1 != null) ck.home = w1;
-      if (w2 != null) ck.away = w2;
+    const setIfOpen = (match, home, away) => {
+      if (match && match.homeScore === '' && match.awayScore === '') {
+        if (home != null) match.home = home;
+        if (away != null) match.away = away;
+      }
+    };
+
+    // Serie A: top 2 mỗi bảng
+    const asf1 = state.matches.find((m) => m.id === 'ASF1');
+    const asf2 = state.matches.find((m) => m.id === 'ASF2');
+    if (a && b && a.length >= 2 && b.length >= 2) {
+      setIfOpen(asf1, a[0].idx, b[1].idx); // 1A vs 2B
+      setIfOpen(asf2, b[0].idx, a[1].idx); // 1B vs 2A
     }
-    if (f3 && f3.homeScore === '' && f3.awayScore === '') {
-      if (l1 != null) f3.home = l1;
-      if (l2 != null) f3.away = l2;
+    const aw1 = winKO('ASF1'), aw2 = winKO('ASF2'), al1 = loseKO('ASF1'), al2 = loseKO('ASF2');
+    setIfOpen(state.matches.find((m) => m.id === 'ACK'), aw1, aw2);
+    setIfOpen(state.matches.find((m) => m.id === 'AF3'), al1, al2);
+
+    // Serie B: hạng 3-4 mỗi bảng
+    const bsf1 = state.matches.find((m) => m.id === 'BSF1');
+    const bsf2 = state.matches.find((m) => m.id === 'BSF2');
+    if (a && b && a.length >= 4 && b.length >= 4) {
+      setIfOpen(bsf1, a[2].idx, b[3].idx); // 3A vs 4B
+      setIfOpen(bsf2, b[2].idx, a[3].idx); // 3B vs 4A
     }
+    const bw1 = winKO('BSF1'), bw2 = winKO('BSF2'), bl1 = loseKO('BSF1'), bl2 = loseKO('BSF2');
+    setIfOpen(state.matches.find((m) => m.id === 'BCK'), bw1, bw2);
+    setIfOpen(state.matches.find((m) => m.id === 'BF3'), bl1, bl2);
     return;
   }
 
   // 1 bảng: CK = nhất vs nhì, hạng 3 = ba vs tư
+  const f3 = state.matches.find((m) => m.id === 'F3');
+  const ck = state.matches.find((m) => m.id === 'CK');
   const standings = computeStandings();
   if (standings.length >= 4) {
     if (f3 && f3.homeScore === '' && f3.awayScore === '') {
@@ -165,7 +176,13 @@ function renderSchedule() {
     if (!stages[m.stage]) stages[m.stage] = [];
     stages[m.stage].push(m);
   });
-  const stageOrder = ['Serie A — Vòng tròn', 'Serie B — Vòng tròn', 'Vòng tròn', 'Bán kết', 'Tranh hạng 3', 'Chung kết'];
+  const stageOrder = [
+    'Bảng A — Vòng tròn', 'Bảng B — Vòng tròn', 'Vòng tròn',
+    'Serie A — Bán kết', 'Serie B — Bán kết',
+    'Serie A — Tranh hạng 3', 'Serie B — Tranh hạng 3',
+    'Serie A — Chung kết', 'Serie B — Chung kết',
+    'Tranh hạng 3', 'Chung kết',
+  ];
   stageOrder.forEach((st) => {
     if (!stages[st]) return;
     const group = document.createElement('div');
@@ -217,7 +234,7 @@ function onMatchInput(e) {
   renderScorers();
   // If a round-robin match changed, re-resolve knockout teams (but keep KO scores if already filled)
   const m2 = state.matches.find((x) => x.id === id);
-  if (m2 && (m2.group === 'Serie A' || m2.group === 'Serie B' || id.startsWith('RR'))) renderSchedule();
+  if (m2 && (m2.group === 'Bảng A' || m2.group === 'Bảng B' || m2.group === 'SerieA' || m2.group === 'SerieB' || id.startsWith('RR'))) renderSchedule();
 }
 
 // ===== Standings =====
@@ -243,8 +260,8 @@ function computeGroup(indices, matchFilter) {
 
 function computeStandings() {
   if (state.teams === 8) {
-    const a = computeGroup([0, 1, 2, 3], (m) => m.group === 'Serie A');
-    const b = computeGroup([4, 5, 6, 7], (m) => m.group === 'Serie B');
+    const a = computeGroup([0, 1, 2, 3], (m) => m.group === 'Bảng A');
+    const b = computeGroup([4, 5, 6, 7], (m) => m.group === 'Bảng B');
     return { a, b };
   }
   // 1 bảng: RR id cho 4/5/6 đội, hoặc có thể là 'RR' cũ
@@ -285,8 +302,8 @@ function renderStandings() {
       blk.appendChild(tbl);
       return blk;
     };
-    wrap.appendChild(buildGroup('Serie A', stand.a));
-    wrap.appendChild(buildGroup('Serie B', stand.b));
+    wrap.appendChild(buildGroup('Bảng A', stand.a));
+    wrap.appendChild(buildGroup('Bảng B', stand.b));
     standBox.appendChild(wrap);
   } else {
     tableEl.style.display = '';

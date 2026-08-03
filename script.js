@@ -3,8 +3,9 @@
 // 4 đội: vòng tròn 1 lượt (6) + CK + hạng 3 = 8
 // 5 đội: vòng tròn 1 lượt (10) + CK + hạng 3 = 12
 // 6 đội: 2 bảng vòng tròn (6) + CK + hạng 3 = 8
-// 8 đội: 2 bảng × 4 vòng tròn (12) + bán kết (2) + CK + hạng 3 = 16
-const MATCHES = { 4: 8, 5: 12, 6: 8, 8: 16 };
+// 8 đội: 2 bảng × 4 vòng tròn (12) + Serie A (top2: bán kết + CK + hạng 3 = 4)
+//        + Serie B (hạng3-4: bán kết + CK + hạng 3 = 4) = 20
+const MATCHES = { 4: 8, 5: 12, 6: 8, 8: 20 };
 
 // Format đầy đủ: 14.000.000 ₫
 const fmt = (n) => {
